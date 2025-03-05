@@ -45,7 +45,7 @@ const Signup = () => {
       });
 
       setSuccess(true);
-      router.push("/signin"); // Redirect to signin page
+      router.push("/login"); // Redirect to signin page
     } catch (err) {
       setError(err.message);
     }
