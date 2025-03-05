@@ -15,6 +15,7 @@ const Signup = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [emailError, setEmailError] = useState(null);  // New email error state
+  const [name , setName] = useState("");
   const router = useRouter();
 
   const handleSignup = async (e) => {
@@ -43,6 +44,7 @@ const Signup = () => {
         email: email,
         nuId: nuId,
         uid: user.uid,
+        name: name,
       });
 
       setSuccess(true);
@@ -69,6 +71,17 @@ const Signup = () => {
             placeholder="Enter your NU ID"
             value={nuId}
             onChange={(e) => setNuId(e.target.value)}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            required
+          />
+        </div>
+        <div className="text-left">
+          <label className="text-sm font-semibold text-gray-700">Name</label>
+          <input
+            type="text"
+            placeholder="Enter your Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             required
           />
