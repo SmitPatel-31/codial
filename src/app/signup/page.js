@@ -42,6 +42,7 @@ const Signup = () => {
       await setDoc(doc(db, "users", user.uid), {
         email: email,
         nuId: nuId,
+        uid: user.uid,
       });
 
       setSuccess(true);
@@ -121,7 +122,7 @@ const Signup = () => {
       <div className="mt-4">
         <p className="text-sm text-gray-600">
           Already have an account?{" "}
-          <a href="/signin" className="text-indigo-600 hover:underline">
+          <a href="/login" className="text-indigo-600 hover:underline">
             Sign in
           </a>
         </p>
