@@ -1,6 +1,6 @@
 import { db,auth,app } from '../src/app/firebase';
-import { getFirestore, doc, getDoc,collection, getDocs } from "firebase/firestore";
-
+import { getFirestore, doc, getDoc,collection, getDocs,updateDoc,arrayUnion } from "firebase/firestore";
+import { v4 as uuidv4 } from "uuid"; 
 export async function getUserData(uid) {
     if (!uid) {
       throw new Error("UID is required to fetch user data.");
@@ -52,3 +52,34 @@ export async function getUserData(uid) {
       throw error;
     }
   }
+
+
+
+  export async function handleStartExam (exam, userData, router) {
+    if (!userData) return;
+    const sessionId = uuidv4(); 
+    const examRef = doc(db, "codingTest", exam.id);
+    const examSnapshot = await getDoc(examRef);
+  
+    if (examSnapshot.exists()) {
+      const examData = examSnapshot.data();
+      console.log("Exam Data:", examData);
+      // Check if the user has already joined
+      const isAlreadyJoined = examData.joined?.some((entry) => entry.uid === userData.uid);
+      
+      console.log("Is Already Joined:", isAlreadyJoined);
+      if (isAlreadyJoined) {
+        alert("You have already joined this exam!");
+        return;
+      }
+      sessionStorage.setItem("allowedExamId", exam.id);
+      sessionStorage.setItem("sessionKey", sessionId);
+      // Update Firestore: Add user to joined array
+      await updateDoc(examRef, {
+        joined: arrayUnion({ uid: userData.uid, name: userData.name,nuId:userData.nuId, }) // Storing name for better tracking
+      });
+  
+      // Redirect to the exam page
+      router.push(`/exam/${exam.id}?session=${sessionId}`);
+    }
+  };
