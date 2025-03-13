@@ -1,5 +1,5 @@
 import { db,auth,app } from '../src/app/firebase';
-import { getFirestore, doc, getDoc,collection, getDocs,updateDoc,arrayUnion } from "firebase/firestore";
+import { getFirestore, doc, getDoc,collection, getDocs,updateDoc,arrayUnion,where,query } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid"; 
 export async function getUserData(uid) {
     if (!uid) {
@@ -74,12 +74,33 @@ export async function getUserData(uid) {
       }
       sessionStorage.setItem("allowedExamId", exam.id);
       sessionStorage.setItem("sessionKey", sessionId);
+      sessionStorage.setItem("userData", JSON.stringify(userData));
       // Update Firestore: Add user to joined array
       await updateDoc(examRef, {
         joined: arrayUnion({ uid: userData.uid, name: userData.name,nuId:userData.nuId, }) // Storing name for better tracking
       });
-  
+      
       // Redirect to the exam page
       router.push(`/exam/${exam.id}?session=${sessionId}`);
     }
   };
+
+  export async function exams(examId) { 
+    try {
+      const examsRef = collection(db, "exam"); // Reference to the "exams" collection
+      const q = query(examsRef, where("id", "==", examId)); // Query where examId matches
+      const querySnapshot = await getDocs(q);
+  
+      if (!querySnapshot.empty) {
+        const examData = querySnapshot.docs[0].data(); // Get the first matching document
+        console.log("Exam Data:", examData);
+        return examData;
+      } else {
+        console.log("No exam found with examId:", examId);
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching exam:", error);
+      return null;
+    }
+  }
