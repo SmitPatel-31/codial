@@ -3,9 +3,14 @@
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../../firebase"; // Import Firebase auth
+import { auth } from "../../firebase";
 import { exams } from "../../../../utils/firefunction";
-import styles from './ExamPage.module.css'; // Import the CSS module
+import styles from './ExamPage.module.css';
+import CodeMirror from "@uiw/react-codemirror";
+import { python } from "@codemirror/lang-python";
+import { java } from "@codemirror/lang-java";
+import { basicDark } from "@uiw/codemirror-theme-basic";
+import { hover } from "framer-motion";
 
 const ExamPage = () => {
   const router = useRouter();
@@ -14,11 +19,12 @@ const ExamPage = () => {
   const pathname = usePathname();
   const examId = pathname.split("/").pop();
   const [user, setUser] = useState(null);
-  const [isValidSession, setIsValidSession] = useState(null); 
+  const [isValidSession, setIsValidSession] = useState(null);
   const [userData, setUserData] = useState(null);
   const [examData, setExamData] = useState(null);
+  const [language, setLanguage] = useState("python");
+  const [code, setCode] = useState("");
 
-  // Authentication check
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -27,11 +33,9 @@ const ExamPage = () => {
         router.push("/login");
       }
     });
-
     return () => unsubscribe();
   }, [router]);
 
-  // Session validation
   useEffect(() => {
     const fetchData = async () => {
       const sessionParam = new URLSearchParams(window.location.search).get("session");
@@ -39,15 +43,17 @@ const ExamPage = () => {
       const sessionId = sessionStorage.getItem("sessionKey");
       setUserData(JSON.parse(sessionStorage.getItem("userData")));
       sessionStorage.removeItem("userData");
-  
+
       if (!allowedExamId || !sessionId || !sessionParam) {
         router.push("/dashboard");
         return;
       }
-  
+
       if (allowedExamId === examId && sessionId === sessionParam) {
         setIsValidSession(true);
-        setExamData(await exams(examId));
+        const data = await exams(examId);
+        setExamData(data);
+        setCode(data?.pythonTemplate || "");
         setTimeout(() => {
           sessionStorage.removeItem("allowedExamId");
           sessionStorage.removeItem("sessionKey");
@@ -56,10 +62,9 @@ const ExamPage = () => {
         router.push("/dashboard");
       }
     };
-  
     fetchData();
   }, [examId, session, router]);
-  
+
   if (isValidSession === null || !user) {
     return <div>Loading...</div>;
   }
@@ -68,58 +73,78 @@ const ExamPage = () => {
     return null;
   }
 
+  const handleLanguageChange = (e) => {
+    setLanguage(e.target.value);
+    setCode(e.target.value === "python" ? examData?.pythonTemplate || "" : examData?.javaTemplate || "");
+  };
+
+  const handleRunCode = () => {
+    console.log(`Running ${language} code:`);
+    console.log(code);
+  };
+
   return (
     <div className={styles.examContainer}>
       <div className={styles.header}>
-        <h1>Exam: {examData?.title}</h1>
-        <button className={styles.submitButton}>Submit</button>
-      </div>
+  <h1 className={styles.examTitle}>📝 Exam: {examData?.title}</h1>
+</div>
 
-      <div className={styles.mainContent}>
+
+      <div className={styles.contentWrapper}>
         {/* Problem Description Section */}
         <div className={styles.problemDescription}>
-          <h3>Problem</h3>
-          <p>{examData?.description}</p>
+    <h2 className={styles.sectionTitle}>Problem</h2>
+    <p className={styles.problemText}>{examData?.description}</p>
 
-          <h4>Input:</h4>
-          <p>{examData?.input}</p>
+    <h3 className={styles.sectionTitle}>Input</h3>
+    <p className={styles.problemText}>{examData?.input}</p>
 
-          <h4>Output:</h4>
-          <p>{examData?.output}</p>
+    <h3 className={styles.sectionTitle}>Output</h3>
+    <p className={styles.problemText}>{examData?.output}</p>
 
-          <h4>Examples:</h4>
-          {examData?.examples?.map((example, index) => (
-            <div key={index}>
-              <p><strong>Input:</strong> {example.input}</p>
-              <p><strong>Output:</strong> {example.output}</p>
-            </div>
-          ))}
-        </div>
+    <h3 className={styles.sectionTitle}>Examples</h3>
+    {examData?.examples?.map((example, index) => (
+      <div key={index} className={styles.exampleBox}>
+        <h4>Input:</h4>
+        <pre className={styles.ioBox}>{example?.input}</pre>
+
+        <h4>Output:</h4>
+        <pre className={styles.ioBox}>{example?.output}</pre>
+      </div>
+    ))}
+  </div>
 
         {/* Code Editor Section */}
         <div className={styles.codeEditorContainer}>
-          <div className={styles.codeEditor}>
-            <h3>Python Code</h3>
-            <textarea
-              className={styles.textarea}
-              id="python-code"
-              placeholder="Write your Python code here"
-              defaultValue={examData?.pythonTemplate || "def reverse_words(s: str) -> str:\n    return ' '.join(s.split()[::-1])"}
-              rows={10}
-              cols={60}
-            />
+          <div className={styles.languageSelector}>
+            <label htmlFor="language" className={styles.languageLabel}>Select Language:</label>
+            <select
+              id="language"
+              value={language}
+              onChange={handleLanguageChange}
+              className={styles.languageDropdown}
+            >
+              <option value="python">🐍 Python</option>
+              <option value="java">☕ Java</option>
+            </select>
           </div>
 
-          <div className={styles.codeEditor}>
-            <h3>Java Code</h3>
-            <textarea
-              className={styles.textarea}
-              id="java-code"
-              placeholder="Write your Java code here"
-              defaultValue={examData?.javaTemplate || "public class Solution {\n    public static String reverseWords(String s) {\n        String[] words = s.split(\" \");\n        StringBuilder result = new StringBuilder();\n        for (int i = words.length - 1; i >= 0; i--) {\n            result.append(words[i]).append(\" \");\n        }\n        return result.toString().trim();\n    }\n}"}
-              rows={10}
-              cols={60}
-            />
+          <CodeMirror
+            value={code.replace(/\\n/g, "\n")}
+            height="calc(100vh - 200px)"
+            extensions={[language === "python" ? python() : java()]}
+            theme={basicDark}
+            onChange={(value) => setCode(value)}
+            basicSetup={{
+              indentOnInput: true,
+              tabSize: 4,
+              bracketMatching: true,
+              autoCloseBrackets: true,
+            }}
+          />
+          <div className={styles.buttonGroup}>
+            <button className={styles.runButton} onClick={handleRunCode}>Run</button>
+            <button className={`bg-red-600 ${styles.submitButton} hover:bg-red-700`}>Submit</button>
           </div>
         </div>
       </div>

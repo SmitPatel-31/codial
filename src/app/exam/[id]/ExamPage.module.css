@@ -1,93 +1,149 @@
-/* ExamPage.module.css */
-
 .examContainer {
-    font-family: Arial, sans-serif;
-    margin: 0 auto;
-    max-width: 1200px;
-    padding: 20px;
-  }
-  
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 0;
-    border-bottom: 2px solid #ddd;
-  }
-  
-  .header h1 {
-    font-size: 24px;
-  }
-  
-  .submitButton {
-    padding: 10px 20px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-  }
-  
-  .submitButton:hover {
-    background-color: #45a049;
-  }
-  
-  .mainContent {
-    display: flex;
-    flex-wrap: wrap;
-    margin-top: 20px;
-  }
-  
-  .problemDescription {
-    flex: 1 1 50%;
-    margin-right: 20px;
-    padding: 20px;
-    background-color: #f7f7f7;
-    border-radius: 8px;
-  }
-  
-  .problemDescription h3 {
-    font-size: 20px;
-    margin-bottom: 10px;
-  }
-  
-  .codeEditorContainer {
-    flex: 1 1 50%;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-  
-  .codeEditor {
-    background-color: #f7f7f7;
-    padding: 20px;
-    border-radius: 8px;
-  }
-  
-  .codeEditor h3 {
-    font-size: 18px;
-    margin-bottom: 10px;
-  }
-  
-  .textarea {
-    width: 100%;
-    padding: 10px;
-    font-family: monospace;
-    font-size: 14px;
-    margin-bottom: 10px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    resize: vertical;
-  }
-  
-  @media (max-width: 768px) {
-    .mainContent {
-      flex-direction: column;
-    }
-  
-    .problemDescription, .codeEditorContainer {
-      flex: 1 1 100%;
-      margin-right: 0;
-    }
-  }
-  
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #1e1e1e;
+  color: white;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: #282a36;
+}
+.examTitle {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: white;  /* Light blue for emphasis */
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+
+.contentWrapper {
+  display: flex;
+  flex-grow: 1;
+  width: 100%;
+  height: calc(100vh - 60px); /* Adjusting for header height */
+}
+
+.problemDescription, .codeEditorContainer {
+  width: 50%;
+  padding: 20px;
+  overflow-y: auto;
+  height: 100%;
+  background:#282a36 ;
+}
+
+.problemDescription {
+  background: #282a36;
+  border-right: 2px solid #44475a;
+}
+
+.codeEditorContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+
+
+.buttonGroup {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.runButton {
+  background-color: #61dafb;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.submitButton {
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+.ioBox {
+  background: #1e1e1e;
+  color: #50fa7b;
+  border: 1px solid #44475a;
+  padding: 10px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: monospace;
+}
+.languageSelector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.languageLabel {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.languageDropdown {
+  padding: 8px;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  background-color: #222;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.languageDropdown:hover {
+  border-color: #888;
+}
+
+.languageDropdown:focus {
+  border-color: #61dafb;
+  outline: none;
+}
+
+.sectionTitle {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-top: 15px;
+  color: #61dafb;  /* Light blue for visibility */
+  border-bottom: 2px solid #444;
+  padding-bottom: 5px;
+}
+
+.problemText {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 10px;
+  color: #ddd; /* Light text for readability */
+}
+
+.ioBox {
+  background-color: #222;
+  color: #fff;
+  padding: 10px;
+  border-radius: 5px;
+  font-family: monospace;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+.exampleBox {
+  background-color: #333;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 12px;
+  border-left: 4px solid #61dafb; /* Highlight examples */
+}
