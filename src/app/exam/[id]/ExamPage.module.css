@@ -65,9 +65,9 @@
   cursor: pointer;
   border-radius: 5px;
 }
-:global(.cm-theme) {
+/* :global(.cm-theme) {
   height: 100% !important;
-}
+} */
 
 .submitButton {
   color: white;
