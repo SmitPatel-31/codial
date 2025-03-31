@@ -1,5 +1,5 @@
 import { db,auth,app } from '../src/app/firebase';
-import { getFirestore, doc, getDoc,collection, getDocs,updateDoc,arrayUnion,where,query } from "firebase/firestore";
+import { getFirestore, doc, getDoc,collection, getDocs,updateDoc,arrayUnion,where,query,serverTimestamp ,addDoc} from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid"; 
 export async function getUserData(uid) {
     if (!uid) {
@@ -103,4 +103,32 @@ export async function getUserData(uid) {
       console.error("Error fetching exam:", error);
       return null;
     }
+  }
+
+
+  export async function submitExamResult(result,userData,examData) {
+    try {
+      // Calculate the score
+      console.log("Exam Data:", examData);
+      console.log("Result Data:", result);
+      const score = (examData.maxPoints * result.total) / result.passed;
+      // Create the result object
+      const resultData = {
+          code: result.Submitcode,
+          passed: result.passed,
+          score: score,
+          user: userData.email,
+          exam: examData.examName,
+          date: serverTimestamp(), // Stores the current timestamp
+      };
+      console.log(resultData);
+      // Save to Firestore (modify collection name as needed)
+      await addDoc(collection(db, "result"), resultData);
+
+      console.log("Exam result submitted successfully!");
+      return { success: true, message: "Exam result saved." };
+  } catch (error) {
+      console.error("Error submitting exam result:", error);
+      return { success: false, message: "Failed to save result." };
+  }
   }

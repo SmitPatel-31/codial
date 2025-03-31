@@ -4,7 +4,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../firebase";
-import { exams } from "../../../../utils/firefunction";
+import { exams, submitExamResult } from "../../../../utils/firefunction";
 import styles from './ExamPage.module.css';
 import CodeMirror from "@uiw/react-codemirror";
 import { python } from "@codemirror/lang-python";
@@ -85,8 +85,12 @@ const ExamPage = () => {
   const [result, setResult] = useState(null);
   const [showCompiler, setShowCompiler] = useState(false);
   const [passed, setPassed] = useState(0);
-const [failed, setFailed] = useState(0);
-const [total, setTotal] = useState(0);
+  const [failed, setFailed] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [compilerOutput, setCompilerOutput] = useState(null);
+  const [errorOutput, setErrorOutput] = useState(null);
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -140,19 +144,27 @@ const [total, setTotal] = useState(0);
     setCode(e.target.value === "python" ? examData?.pythonTemplate || "" : examData?.javaTemplate || "");
   };
 
-  const handleRunCode =async () => {
-    console.log(`Running ${language} code:`);
-    console.log(code);
-  };
-
-  const handleSubmit = async() => {
+  const handleRunCode = async () => {
+    setIsRunning(true);
     const result = await submitCode(code.replace(/\\n/g, "\n"), language, examData);
     console.log("Submission Result:", result);
     setResult(result);
     setPassed(result.passed);
     setFailed(result.total - result.passed);
+    setCompilerOutput(result.compilerOutput);
+    setErrorOutput(result.errorOutput);
     setTotal(result.total);
     setShowCompiler(true);
+    setIsRunning(false);
+  };
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    const result = await submitCode(code.replace(/\\n/g, "\n"), language, examData);
+    console.log("Submission Result:", result);
+    await submitExamResult(result, user, examData);
+    router.push("/dashboard");
+
 
   }
 
@@ -189,54 +201,119 @@ const [total, setTotal] = useState(0);
 
         {/* Code Editor Section */}
         <div className={styles.codeEditorContainer}>
-          <div className={styles.languageSelector}>
-            <label htmlFor="language" className={styles.languageLabel}>Select Language:</label>
-            <select
-              id="language"
-              value={language}
-              onChange={handleLanguageChange}
-              className={styles.languageDropdown}
-            >
-              <option value="python">🐍 Python</option>
-              <option value="java">☕ Java</option>
-            </select>
+          <div style={{ height: "100%" }}>
+            <div className={styles.languageSelector}>
+              <label htmlFor="language" className={styles.languageLabel}>Select Language:</label>
+              <select
+                id="language"
+                value={language}
+                onChange={handleLanguageChange}
+                className={styles.languageDropdown}
+              >
+                <option value="python">🐍 Python</option>
+                <option value="java">☕ Java</option>
+              </select>
+            </div>
+            <div style={{ height: "calc(100% - 100px)" }} >
+              <CodeMirror
+                value={code.replace(/\\n/g, "\n")}
+                height="100%"
+                extensions={[
+                  language === "python" ? [python(), pythonLinter] : [java()],
+                ]}
+                editable={!isRunning}
+                theme={basicDark}
+                onChange={(value) => setCode(value)}
+                basicSetup={{
+                  indentOnInput: true,
+                  tabSize: 4,
+                  bracketMatching: true,
+                  autoCloseBrackets: true,
+                }}
+              />
+            </div>
+
+            <div className={styles.buttonGroup}>
+              {/* <button className={styles.runButton} onClick={handleRunCode}>Run</button> */}
+              <button
+                className={`${styles.runButton} ${isRunning ? "opacity-50 cursor-not-allowed" : ""}`}
+                onClick={handleRunCode}
+                disabled={isRunning}
+              >
+                {isRunning ? (
+                  <img src="/loading.gif" alt="Loading..." width="20" height="20" />
+                ) : (
+                  "Run"
+                )}
+              </button>
+              <button
+                className={`bg-red-600 ${styles.submitButton} hover:bg-red-700 ${isRunning ? "opacity-50 cursor-not-allowed" : ""}`}
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <img src="/loading.gif" alt="Submitting..." width="20" height="20" />
+                ) : (
+                  "Submit"
+                )}
+              </button>
+            </div>
           </div>
 
-          <CodeMirror
-            value={code.replace(/\\n/g, "\n")}
-            height={showCompiler ? "calc(100vh - 450px)" : "calc(100vh - 200px)"}
-            extensions={[
-              language === "python" ? [python(), pythonLinter] : [java()],
-            ]}
-            theme={basicDark}
-            onChange={(value) => setCode(value)}
-            basicSetup={{
-              indentOnInput: true,
-              tabSize: 4,
-              bracketMatching: true,
-              autoCloseBrackets: true,
-            }}
-          />
-          <div className={styles.buttonGroup}>
-            <button className={styles.runButton} onClick={handleRunCode}>Run</button>
-            <button className={`bg-red-600 ${styles.submitButton} hover:bg-red-700`} onClick={handleSubmit}>Submit</button>
-          </div>
-          {showCompiler && (
-            <div className="p-4 bg-gray-900 text-white rounded-xl shadow-md text-center">
-              <h2 className="text-lg font-semibold mb-4">Submission Results</h2>
-              <div className="flex justify-center space-x-4">
-                <div className="flex flex-col items-center bg-green-700 px-4 py-2 rounded-lg">
-                  <p className="text-xl font-bold">{passed}</p>
-                  <p className="text-sm">Passed ✅</p>
+          <div >
+            {showCompiler && (
+              <div className={styles.resultContainer} style={{ height: "40%", borderRadius: "12px" }} >
+                <div className=" bg-gray-900 shadow-2xl shadow-gray-900/50" style={{ display: "flex", flexDirection: "row-reverse", height: "40px", borderRadius: "12px 12px 0px 0px" }}>
+                  <button
+                    className="top-2 right-2 text-whiterounded-full p-2 text-sm"
+                    style={{ marginRight: "10px" }}
+                    onClick={() => setShowCompiler(false)}
+                  >
+                    ❌
+                  </button>
                 </div>
-                <div className="flex flex-col items-center bg-red-700 px-4 py-2 rounded-lg">
-                  <p className="text-xl font-bold">{failed}</p>
-                  <p className="text-sm">Failed ❌</p>
+
+                <div className=" bg-gray-900" style={{ overflow: "auto", height: "calc(100% - 40px)" }} >
+                  {/* Close Button */}
+
+
+                  {/* Compiler Output */}
+                  {compilerOutput?.length > 0 && (
+                    <div className="p-4 bg-gray-800 text-white rounded-xl shadow-md" style={{ margin: "20px" }}>
+                      <h2 className="text-lg font-semibold mb-4">Compiler Output</h2>
+                      <pre className="whitespace-pre-wrap">{compilerOutput.join("\n")}</pre>
+                    </div>
+                  )}
+
+                  {/* Error Output */}
+                  {errorOutput?.length > 0 && (
+                    <div className="p-4 bg-gray-800 text-white rounded-xl shadow-md" style={{ margin: "20px" }}>
+                      <h2 className="text-lg font-semibold mb-4">Error Output</h2>
+                      <pre className="whitespace-pre-wrap">{errorOutput.join("\n")}</pre>
+                    </div>
+                  )}
+
+                  {/* Submission Results */}
+                  <div className="p-4 bg-gray-900 text-white rounded-xl shadow-md text-center">
+                    <h2 className="text-lg font-semibold mb-4">Submission Results</h2>
+                    <div className="flex justify-center space-x-4">
+                      <div className="flex flex-col items-center bg-green-700 px-4 py-2 rounded-lg">
+                        <p className="text-xl font-bold">{passed}</p>
+                        <p className="text-sm">Passed ✅</p>
+                      </div>
+                      <div className="flex flex-col items-center bg-red-700 px-4 py-2 rounded-lg">
+                        <p className="text-xl font-bold">{failed}</p>
+                        <p className="text-sm">Failed ❌</p>
+                      </div>
+                    </div>
+                    <p className="mt-4 text-gray-300">Total Test Cases: {total}</p>
+                  </div>
                 </div>
               </div>
-              <p className="mt-4 text-gray-300">Total Test Cases: {total}</p>
-            </div>
-          )}
+            )}
+          </div>
+
+
 
         </div>
       </div>
