@@ -8,7 +8,34 @@ body {
 }
 
 
+.gutter {
+  background-color: #3f3f3f;
+  cursor: col-resize;
+  width: 4px;
+  padding: 0 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gutter::before {
+  content: "Hello";
+  width: 10px;
+  height: 50px;
+  background-color: #777;
+  border-radius: 4px;
+}
+
 
 .cm-theme {
   height: 100% !important;
+}
+.hideScrollbar {
+  overflow: auto;
+  scrollbar-width: none;       /* Firefox */
+  -ms-overflow-style: none;    /* Internet Explorer/Edge */
+}
+
+.hideScrollbar::-webkit-scrollbar {
+  display: none;               /* Chrome, Safari, and Opera */
 }

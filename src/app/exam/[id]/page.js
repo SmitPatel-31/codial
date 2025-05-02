@@ -13,6 +13,110 @@ import { basicDark } from "@uiw/codemirror-theme-basic";
 import { hover } from "framer-motion";
 import { linter, lintGutter } from "@codemirror/lint";
 import { submitCode } from './submit';
+import { StreamLanguage } from '@codemirror/language';
+import { scala } from '@codemirror/legacy-modes/mode/clike';
+import Split from "react-split";
+
+/**
+ * Very basic pattern-based Scala linter in JS
+ * Only checks for simple issues in raw code text
+ */
+const scalaLinter2 = linter(async (view) => {
+  const errors = [];
+  const code = view.state.doc.toString();
+  const lines = code.split("\n");
+
+  lines.forEach((line, index) => {
+    const lineNumber = index + 1;
+    const lineInfo = view.state.doc.line(lineNumber);
+
+    // ❌ Use of `var`
+    if (/^\s*var\s/.test(line)) {
+      errors.push({
+        from: lineInfo.from,
+        to: lineInfo.to,
+        severity: "warning",
+        message: "Avoid using 'var'. Prefer 'val'."
+      });
+    }
+
+    // ❌ Function name starts with uppercase
+    const defMatch = line.match(/def\s+([A-Z][a-zA-Z0-9_]*)\s*\(/);
+    if (defMatch) {
+      errors.push({
+        from: lineInfo.from,
+        to: lineInfo.to,
+        severity: "warning",
+        message: `Method '${defMatch[1]}' should start with a lowercase letter.`
+      });
+    }
+
+    // ❌ Missing closing parenthesis in `for` loop
+    if (/for\s*\([^)]+$/.test(line)) {
+      errors.push({
+        from: lineInfo.from,
+        to: lineInfo.to,
+        severity: "error",
+        message: "Possible missing closing parenthesis in 'for' loop."
+      });
+    }
+
+    // ❌ Thread.sleep usage
+    if (line.includes("Thread.sleep")) {
+      errors.push({
+        from: lineInfo.from,
+        to: lineInfo.to,
+        severity: "warning",
+        message: "Avoid using Thread.sleep — it's usually bad practice."
+      });
+    }
+
+    // ❌ Unmatched quotes
+    const quoteCount = (line.match(/"/g) || []).length;
+    if (quoteCount % 2 !== 0) {
+      errors.push({
+        from: lineInfo.from,
+        to: lineInfo.to,
+        severity: "error",
+        message: "Unmatched quote detected."
+      });
+    }
+  });
+
+  return errors;
+});
+
+
+
+const scalaLinter = linter(async (view) => {
+  const code = view.state.doc.toString();
+  const errors = [];
+
+  const res = await fetch("/api/lintScala", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code }),
+  });
+
+  const result = await res.json();
+
+  if (!result.success && result.errors.length > 0) {
+    for (let err of result.errors) {
+      const lineInfo = view.state.doc.line(err.line + 1);
+      errors.push({
+        from: lineInfo.from,
+        to: lineInfo.to,
+        severity: "error",
+        message: err.message,
+      });
+    }
+  }
+
+  return errors;
+});
+
+
+
 
 async function loadPyodide() {
   return new Promise((resolve, reject) => {
@@ -138,12 +242,17 @@ const ExamPage = () => {
   if (!isValidSession) {
     return null;
   }
-
   const handleLanguageChange = (e) => {
     setLanguage(e.target.value);
-    setCode(e.target.value === "python" ? examData?.pythonTemplate || "" : examData?.javaTemplate || "");
+    if (e.target.value === "python") {
+      setCode(examData?.pythonTemplate || "");
+    } else if (e.target.value === "java") {
+      setCode(examData?.javaTemplate || "");
+    } else {
+      setCode(examData?.scalaTemplate || "");
+    }
   };
-
+  
   const handleRunCode = async () => {
     setIsRunning(true);
     const result = await submitCode(code.replace(/\\n/g, "\n"), language, examData);
@@ -160,24 +269,36 @@ const ExamPage = () => {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    const result = await submitCode(code.replace(/\\n/g, "\n"), language, examData);
-    console.log("Submission Result:", result);
-    await submitExamResult(result, user, examData);
-    router.push("/dashboard");
-
+    // const result = await submitCode(code.replace(/\\n/g, "\n"), language, examData);
+    // console.log("Submission Result:", result);
+    // await submitExamResult(result, user, examData);
+    const queryParams = new URLSearchParams({
+      examData: examData,
+      user: user,
+    }).toString();
+    router.push(`/feedback?${queryParams}`);
+    
+    // router.push("/dashboard");
 
   }
 
   return (
     <div className={styles.examContainer}>
+
       <div className={styles.header}>
         <h1 className={styles.examTitle}>📝 Exam: {examData?.title}</h1>
       </div>
 
-
+    
       <div className={styles.contentWrapper}>
         {/* Problem Description Section */}
-        <div className={styles.problemDescription}>
+        <Split
+        className={styles.splitContainer}
+        sizes={[45, 55]}
+        minSize={300}
+        gutterSize={6}
+      >
+        <div className={`${styles.problemDescription} ${styles.hideScrollbar}`}>
           <h2 className={styles.sectionTitle}>Problem</h2>
           <p className={styles.problemText}>{examData?.description}</p>
 
@@ -212,6 +333,7 @@ const ExamPage = () => {
               >
                 <option value="python">🐍 Python</option>
                 <option value="java">☕ Java</option>
+                <option value="scala">🚀 Scala</option>
               </select>
             </div>
             <div style={{ height: "calc(100% - 100px)" }} >
@@ -219,8 +341,12 @@ const ExamPage = () => {
                 value={code.replace(/\\n/g, "\n")}
                 height="100%"
                 extensions={[
-                  language === "python" ? [python(), pythonLinter] : [java()],
-                ]}
+                  language === "python"
+                    ? [python(), pythonLinter]
+                    : language === "java"
+                    ? [java()]
+                    : [StreamLanguage.define(scala),scalaLinter],
+                ]}                
                 editable={!isRunning}
                 theme={basicDark}
                 onChange={(value) => setCode(value)}
@@ -316,6 +442,7 @@ const ExamPage = () => {
 
 
         </div>
+        </Split>
       </div>
     </div>
   );

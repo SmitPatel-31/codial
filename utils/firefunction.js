@@ -1,5 +1,5 @@
 import { db,auth,app } from '../src/app/firebase';
-import { getFirestore, doc, getDoc,collection, getDocs,updateDoc,arrayUnion,where,query,serverTimestamp ,addDoc} from "firebase/firestore";
+import { getFirestore, doc, getDoc,collection, getDocs,updateDoc,arrayUnion,where,query,serverTimestamp ,addDoc,setDoc,Timestamp} from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid"; 
 export async function getUserData(uid) {
     if (!uid) {
@@ -132,3 +132,30 @@ export async function getUserData(uid) {
       return { success: false, message: "Failed to save result." };
   }
   }
+
+  export async function createCodingTest(exam, codingTest) {
+    try {
+      // 1. Add codingTest to "codingTest" collection
+      const startDate = new Date(codingTest.date);
+      const endDate = new Date(codingTest.endDate);
+      const codingTestData = {
+        ...codingTest,
+        date: Timestamp.fromDate(startDate),
+        endDate: Timestamp.fromDate(endDate),
+      };
+      const codingTestRef = await addDoc(collection(db, "codingTest"), codingTestData);
+  
+      // 2. Use the generated codingTest ID as a reference in the exam object
+      exam.id = codingTestRef.id;
+  
+      // 3. Add exam to "exam" collection using the same ID (optional: use auto-id instead)
+      await setDoc(doc(db, "exam"), exam);
+  
+      console.log("Coding test and exam saved successfully.");
+      return { success: true, testId: codingTestRef.id };
+    } catch (error) {
+      console.error("Error saving coding test and exam:", error);
+      throw error;
+    }
+  }
+  

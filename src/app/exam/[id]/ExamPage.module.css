@@ -41,7 +41,6 @@
 
 .problemDescription {
   background: #282a36;
-  border-right: 2px solid #44475a;
 }
 
 .codeEditorContainer {
@@ -195,4 +194,19 @@
     height: 40px;
     display: flex;
     flex-direction: row-reverse;
+}
+.splitContainer {
+  flex: 1;
+  display: flex;
+  height: calc(100vh - 60px); /* Adjust for header */
+}
+
+.hideScrollbar {
+  overflow: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.hideScrollbar::-webkit-scrollbar {
+  display: none;
 }

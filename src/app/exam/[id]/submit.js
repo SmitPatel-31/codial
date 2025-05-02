@@ -1,6 +1,14 @@
 const JUDGE0_URL = "http://18.204.202.118:2358";
 
 
+const languageMap = {
+    python: 71, // Python (3.8.1)
+    java: 62,   // Java (OpenJDK 13.0.1)
+    scala: 81,  // Scala (2.13.2)
+  };
+
+  
+
 export async function submitCode(code, language, examData) {
     console.log("Submitting Code:", code);
     console.log("Language:", language);
@@ -23,7 +31,7 @@ export async function submitCode(code, language, examData) {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    language_id: language === "python" ? 71 : 62, // 71 = Python, 62 = Java
+                    language_id: languageMap[language],
                     source_code: code,
                     stdin: testCase.input, 
                     expected_output: testCase.output,
@@ -52,6 +60,7 @@ export async function submitCode(code, language, examData) {
         }
 
         // Check which test cases passed
+        
         return { passed: passedTests, total: total,compilerOutput: compilerOutput, errorOutput: errorOutput,Submitcode:code};
         // return {passed: 2, total: 2,compilerOutput: compilerOutput, errorOutput: errorOutput};
     } catch (error) {
