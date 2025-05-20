@@ -1,5 +1,6 @@
 import { db,auth,app } from '../src/app/firebase';
 import { getFirestore, doc, getDoc,collection, getDocs,updateDoc,arrayUnion,where,query,serverTimestamp ,addDoc,setDoc,Timestamp} from "firebase/firestore";
+import { use } from 'react';
 import { v4 as uuidv4 } from "uuid"; 
 export async function getUserData(uid) {
     if (!uid) {
@@ -117,9 +118,13 @@ export async function getUserData(uid) {
           code: result.Submitcode,
           passed: result.passed,
           score: score,
-          user: userData.email,
+          email: userData.email,
           exam: examData.examName,
-          date: serverTimestamp(), // Stores the current timestamp
+          date: serverTimestamp(),
+          id: examData.id,
+          userId: userData.nuId,
+          name: userData.name,
+          uid: userData.uid,
       };
       console.log(resultData);
       // Save to Firestore (modify collection name as needed)
@@ -155,6 +160,27 @@ export async function getUserData(uid) {
       return { success: true, testId: codingTestRef.id };
     } catch (error) {
       console.error("Error saving coding test and exam:", error);
+      throw error;
+    }
+  }
+
+  export async function getStudentExamResult(examId) {
+    try {
+      const q = query(
+        collection(db, "result"),
+        where("id", "==", examId)
+      );
+  
+      const querySnapshot = await getDocs(q);
+      const results = [];
+  
+      querySnapshot.forEach((doc) => {
+        results.push(doc.data());
+      });
+  
+      return results;
+    } catch (error) {
+      console.error("Error fetching student exam results:", error);
       throw error;
     }
   }

@@ -1,6 +1,6 @@
 "use client";
 import { useState } from 'react';
-import { createCodingTest } from "../../../utils/firefunction";
+import { createCodingTest } from "../../../../utils/firefunction";
 import CodeMirror from "@uiw/react-codemirror";
 import { java } from "@codemirror/lang-java";
 import { python } from "@codemirror/lang-python";
