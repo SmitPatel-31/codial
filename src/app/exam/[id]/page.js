@@ -269,9 +269,9 @@ const ExamPage = () => {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    // const result = await submitCode(code.replace(/\\n/g, "\n"), language, examData);
-    // console.log("Submission Result:", result);
-    // await submitExamResult(result, user, examData);
+    const result = await submitCode(code.replace(/\\n/g, "\n"), language, examData);
+    console.log("Submission Result:", result);
+    await submitExamResult(result, user, examData);
     const queryParams = new URLSearchParams({
       examData: examData,
       user: user,

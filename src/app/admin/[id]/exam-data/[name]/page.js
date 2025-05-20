@@ -41,7 +41,7 @@ const ExamAnalysis = () => {
   const [stats, setStats] = useState({ avg: 0, median: 0, mode: 0 });
   const parts = pathname.split("/");
   const examId = parts[2];
-  const examName = parts[4];
+  const examName = decodeURIComponent(parts[4]);
   useEffect(() => {
    
     const fetchData = async () => {
