@@ -62,9 +62,9 @@ const CodingTestForm = () => {
           exam.scalaTemplate = exam.scalaTemplate.replace(/\\n/g, "\n");
           exam.javaTemplate = exam.javaTemplate.replace(/\\n/g, "\n");
           exam.pythonTemplate = exam.pythonTemplate.replace(/\\n/g, "\n");
-      
+          exam.examName = codingTest.name;
           await createCodingTest(exam, codingTest);
-      
+            
           // Reset form fields
           setCodingTest({
             date: '',
@@ -74,7 +74,6 @@ const CodingTestForm = () => {
       
           setExam({
             examName: '',
-            title: '',
             description: '',
             input: '',
             output: '',
@@ -115,8 +114,8 @@ const CodingTestForm = () => {
                 {/* Exam Fields */}
                 <h2 className="font-semibold">Exam Problem Info</h2>
 
-                <label className="block font-medium">Exam Name</label>
-                <input name="examName" value={exam.examName} onChange={handleExamChange} placeholder="Exam Name" className="border p-2 w-full" required />
+                {/* <label className="block font-medium">Exam Name</label>
+                <input name="examName" value={exam.examName} onChange={handleExamChange} placeholder="Exam Name" className="border p-2 w-full" required /> */}
 
                 <label className="block font-medium">Problem Title</label>
                 <input name="title" value={exam.title} onChange={handleExamChange} placeholder="Title" className="border p-2 w-full" required />
