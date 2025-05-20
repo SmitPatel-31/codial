@@ -154,7 +154,7 @@ export async function getUserData(uid) {
       exam.id = codingTestRef.id;
   
       // 3. Add exam to "exam" collection using the same ID (optional: use auto-id instead)
-      await addDoc(doc(db, "exam"), exam);
+      await addDoc(collection(db, "exam"), exam);
   
       console.log("Coding test and exam saved successfully.");
       return { success: true, testId: codingTestRef.id };
