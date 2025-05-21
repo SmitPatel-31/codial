@@ -1,4 +1,4 @@
-const JUDGE0_URL = "http://18.204.202.118:2358";
+const JUDGE0_URL = "http://52.90.7.25:2358";
 
 
 const languageMap = {
