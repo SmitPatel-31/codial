@@ -1,4 +1,4 @@
-const JUDGE0_URL = "http://52.90.7.25:2358";
+const JUDGE0_URL = "https://fetchme.me";
 
 
 const languageMap = {
