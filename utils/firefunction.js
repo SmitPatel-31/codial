@@ -120,11 +120,12 @@ export async function exams(examId) {
 }
 
 
-export async function submitExamResult(result, userData, examData) {
+export async function submitExamResult(result, userData, examData,cheatingLogs) {
   try {
     // Calculate the score
     console.log("Exam Data:", examData);
     console.log("Result Data:", result);
+    const userVal = await getUserData(userData.uid)
     const score = (examData.maxPoints * result.total) / result.passed;
     // Create the result object
     const resultData = {
@@ -135,11 +136,15 @@ export async function submitExamResult(result, userData, examData) {
       exam: examData.examName,
       date: serverTimestamp(),
       id: examData.id,
-      userId: userData.nuId,
-      name: userData.name,
+      userId: userVal.nuId,
+      name: userVal.name,
       uid: userData.uid,
+      tabSwitchCount:cheatingLogs.tabSwitchCount,
+      tabSwitchLogs:cheatingLogs.tabSwitchLogs,
+      exitedFullscreen:cheatingLogs.exitedFullscreen
     };
     console.log(resultData);
+
     // Save to Firestore (modify collection name as needed)
     await addDoc(collection(db, "result"), resultData);
 

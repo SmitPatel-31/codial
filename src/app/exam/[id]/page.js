@@ -200,8 +200,9 @@ const ExamPage = () => {
   const [tabSwitchCount, setTabSwitchCount] = useState(0);
 
   const [exitedFullscreen, setExitedFullscreen] = useState(false);
-
   
+const [tabSwitchLogs, setTabSwitchLogs] = useState([]);
+
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -251,13 +252,12 @@ const ExamPage = () => {
         // User switched away from the tab
         setTabSwitchCount(prev => {
           const newCount = prev + 1;
-          console.log(`User switched tabs/windows. Count: ${newCount}`);
-          console.log(`Tab became hidden at: ${new Date().toLocaleTimeString()}`);
+          setTabSwitchLogs(prev => [...prev, { type: 'hidden', time: Date.now() }]);
           return newCount;
         });
       } else {
+          setTabSwitchLogs(prev => [...prev, { type: 'visible', time: Date.now()}]);
 
-        console.log(`User returned to the tab at: ${new Date().toLocaleTimeString()}`);
         toast.error('Tab switched Detected', {
           position: "top-right",
           autoClose: 5000,
@@ -271,13 +271,6 @@ const ExamPage = () => {
       }
     };
 
-    // const handleWindowBlur = () => {
-    //   console.log(`Window lost focus at: ${new Date().toLocaleTimeString()}`);
-    // };
-
-    // const handleWindowFocus = () => {
-    //   console.log(`Window gained focus at: ${new Date().toLocaleTimeString()}`);
-    // };
 
     // Add event listeners
     document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -293,13 +286,7 @@ const ExamPage = () => {
     };
   }, []);
 
-  {
-    tabSwitchCount >= 3 && (
-      <div className={styles.warningBox}>
-        ⚠️ You have switched tabs multiple times. Further actions may end your exam.
-      </div>
-    )
-  }
+  
   useEffect(() => {
     if (tabSwitchCount >= 3) {
       toast.error('Now Exam will close automatically', {
@@ -324,18 +311,6 @@ useEffect(() => {
 
     if (!isFullscreen) {
       setExitedFullscreen(true);
-
-      toast.error('You Exited from Full Screen Mode', {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "dark",
-        });
-        
     }
   };
 
@@ -349,6 +324,24 @@ useEffect(() => {
     document.removeEventListener('msfullscreenchange', onFullscreenChange);
   };
 }, []);
+
+useEffect(() => {
+  if (exitedFullscreen) {
+
+    toast.error('You Exited from Full Screen Mode', {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+    setTabSwitchLogs(prev => [...prev, { type: 'Full Screen Exit', time: Date.now()}]);
+
+  }
+}, [exitedFullscreen]);
 
 
 
@@ -388,7 +381,13 @@ useEffect(() => {
     setIsSubmitting(true);
     const result = await submitCode(code.replace(/\\n/g, "\n"), language, examData);
     console.log("Submission Result:", result);
-    await submitExamResult(result, user, examData);
+    // in idle case exitedFullscreen must be false;
+    const cheatingLogs = {
+      tabSwitchCount:tabSwitchCount,
+      tabSwitchLogs: tabSwitchLogs,
+      exitedFullscreen:exitedFullscreen
+    }
+    await submitExamResult(result, user, examData,cheatingLogs);
     const queryParams = new URLSearchParams({
       examData: examData,
       user: user,
