@@ -29,7 +29,9 @@
     "next": "15.1.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-hot-toast": "^2.5.2",
     "react-split": "^2.0.14",
+    "react-toastify": "^11.0.5",
     "scalameta-parsers": "^4.13.4",
     "uuid": "^11.1.0"
   },

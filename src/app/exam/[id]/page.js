@@ -16,6 +16,7 @@ import { submitCode } from './submit';
 import { StreamLanguage } from '@codemirror/language';
 import { scala } from '@codemirror/legacy-modes/mode/clike';
 import Split from "react-split";
+import { ToastContainer, toast } from 'react-toastify';
 
 /**
  * Very basic pattern-based Scala linter in JS
@@ -174,6 +175,7 @@ const pythonLinter = linter(async (view) => {
 
 
 
+
 const ExamPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -195,6 +197,12 @@ const ExamPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [compilerOutput, setCompilerOutput] = useState(null);
   const [errorOutput, setErrorOutput] = useState(null);
+  const [tabSwitchCount, setTabSwitchCount] = useState(0);
+
+  const [exitedFullscreen, setExitedFullscreen] = useState(false);
+
+  
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -235,6 +243,115 @@ const ExamPage = () => {
     fetchData();
   }, [examId, session, router]);
 
+
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // User switched away from the tab
+        setTabSwitchCount(prev => {
+          const newCount = prev + 1;
+          console.log(`User switched tabs/windows. Count: ${newCount}`);
+          console.log(`Tab became hidden at: ${new Date().toLocaleTimeString()}`);
+          return newCount;
+        });
+      } else {
+
+        console.log(`User returned to the tab at: ${new Date().toLocaleTimeString()}`);
+        toast.error('Tab switched Detected', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
+      }
+    };
+
+    // const handleWindowBlur = () => {
+    //   console.log(`Window lost focus at: ${new Date().toLocaleTimeString()}`);
+    // };
+
+    // const handleWindowFocus = () => {
+    //   console.log(`Window gained focus at: ${new Date().toLocaleTimeString()}`);
+    // };
+
+    // Add event listeners
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    // window.addEventListener("blur", handleWindowBlur);
+    // window.addEventListener("focus", handleWindowFocus);
+
+    // Cleanup function
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      // window.removeEventListener("blur", handleWindowBlur);
+      // window.removeEventListener("focus", handleWindowFocus);
+      console.log("Tab switch detection cleanup completed");
+    };
+  }, []);
+
+  {
+    tabSwitchCount >= 3 && (
+      <div className={styles.warningBox}>
+        ⚠️ You have switched tabs multiple times. Further actions may end your exam.
+      </div>
+    )
+  }
+  useEffect(() => {
+    if (tabSwitchCount >= 3) {
+      toast.error('Now Exam will close automatically', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+    }
+  }, [tabSwitchCount])
+
+useEffect(() => {
+  const onFullscreenChange = () => {
+    const isFullscreen =
+      document.fullscreenElement ||
+      document.webkitFullscreenElement ||
+      document.msFullscreenElement;
+
+    if (!isFullscreen) {
+      setExitedFullscreen(true);
+
+      toast.error('You Exited from Full Screen Mode', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
+        
+    }
+  };
+
+  document.addEventListener('fullscreenchange', onFullscreenChange);
+  document.addEventListener('webkitfullscreenchange', onFullscreenChange); // Safari
+  document.addEventListener('msfullscreenchange', onFullscreenChange); // IE11
+
+  return () => {
+    document.removeEventListener('fullscreenchange', onFullscreenChange);
+    document.removeEventListener('webkitfullscreenchange', onFullscreenChange);
+    document.removeEventListener('msfullscreenchange', onFullscreenChange);
+  };
+}, []);
+
+
+
   if (isValidSession === null || !user) {
     return <div>Loading...</div>;
   }
@@ -252,7 +369,7 @@ const ExamPage = () => {
       setCode(examData?.scalaTemplate || "");
     }
   };
-  
+
   const handleRunCode = async () => {
     setIsRunning(true);
     const result = await submitCode(code.replace(/\\n/g, "\n"), language, examData);
@@ -277,7 +394,7 @@ const ExamPage = () => {
       user: user,
     }).toString();
     router.push(`/feedback?${queryParams}`);
-    
+
     // router.push("/dashboard");
 
   }
@@ -288,160 +405,160 @@ const ExamPage = () => {
       <div className={styles.header}>
         <h1 className={styles.examTitle}>📝 Exam: {examData?.title}</h1>
       </div>
+      <ToastContainer />
 
-    
       <div className={styles.contentWrapper}>
         {/* Problem Description Section */}
         <Split
-        className={styles.splitContainer}
-        sizes={[45, 55]}
-        minSize={300}
-        gutterSize={6}
-      >
-        <div className={`${styles.problemDescription} ${styles.hideScrollbar}`}>
-          <h2 className={styles.sectionTitle}>Problem</h2>
-          <p className={styles.problemText}>{examData?.description}</p>
+          className={styles.splitContainer}
+          sizes={[45, 55]}
+          minSize={300}
+          gutterSize={6}
+        >
+          <div className={`${styles.problemDescription} ${styles.hideScrollbar}`}>
+            <h2 className={styles.sectionTitle}>Problem</h2>
+            <p className={styles.problemText}>{examData?.description}</p>
 
-          <h3 className={styles.sectionTitle}>Input</h3>
-          <p className={styles.problemText}>{examData?.input}</p>
+            <h3 className={styles.sectionTitle}>Input</h3>
+            <p className={styles.problemText}>{examData?.input}</p>
 
-          <h3 className={styles.sectionTitle}>Output</h3>
-          <p className={styles.problemText}>{examData?.output}</p>
+            <h3 className={styles.sectionTitle}>Output</h3>
+            <p className={styles.problemText}>{examData?.output}</p>
 
-          <h3 className={styles.sectionTitle}>Examples</h3>
-          {examData?.examples?.map((example, index) => (
-            <div key={index} className={styles.exampleBox}>
-              <h4>Input:</h4>
-              <pre className={styles.ioBox}>{example?.input}</pre>
+            <h3 className={styles.sectionTitle}>Examples</h3>
+            {examData?.examples?.map((example, index) => (
+              <div key={index} className={styles.exampleBox}>
+                <h4>Input:</h4>
+                <pre className={styles.ioBox}>{example?.input}</pre>
 
-              <h4>Output:</h4>
-              <pre className={styles.ioBox}>{example?.output}</pre>
-            </div>
-          ))}
-        </div>
-
-        {/* Code Editor Section */}
-        <div className={styles.codeEditorContainer}>
-          <div style={{ height: "100%" }}>
-            <div className={styles.languageSelector}>
-              <label htmlFor="language" className={styles.languageLabel}>Select Language:</label>
-              <select
-                id="language"
-                value={language}
-                onChange={handleLanguageChange}
-                className={styles.languageDropdown}
-              >
-                <option value="python">🐍 Python</option>
-                <option value="java">☕ Java</option>
-                <option value="scala">🚀 Scala</option>
-              </select>
-            </div>
-            <div style={{ height: "calc(100% - 100px)" }} >
-              <CodeMirror
-                value={code.replace(/\\n/g, "\n")}
-                height="100%"
-                extensions={[
-                  language === "python"
-                    ? [python(), pythonLinter]
-                    : language === "java"
-                    ? [java()]
-                    : [StreamLanguage.define(scala),scalaLinter],
-                ]}                
-                editable={!isRunning}
-                theme={basicDark}
-                onChange={(value) => setCode(value)}
-                basicSetup={{
-                  indentOnInput: true,
-                  tabSize: 4,
-                  bracketMatching: true,
-                  autoCloseBrackets: true,
-                }}
-              />
-            </div>
-
-            <div className={styles.buttonGroup}>
-              {/* <button className={styles.runButton} onClick={handleRunCode}>Run</button> */}
-              <button
-                className={`${styles.runButton} ${isRunning ? "opacity-50 cursor-not-allowed" : ""}`}
-                onClick={handleRunCode}
-                disabled={isRunning}
-              >
-                {isRunning ? (
-                  <img src="/loading.gif" alt="Loading..." width="20" height="20" />
-                ) : (
-                  "Run"
-                )}
-              </button>
-              <button
-                className={`bg-red-600 ${styles.submitButton} hover:bg-red-700 ${isRunning ? "opacity-50 cursor-not-allowed" : ""}`}
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <img src="/loading.gif" alt="Submitting..." width="20" height="20" />
-                ) : (
-                  "Submit"
-                )}
-              </button>
-            </div>
+                <h4>Output:</h4>
+                <pre className={styles.ioBox}>{example?.output}</pre>
+              </div>
+            ))}
           </div>
 
-          <div >
-            {showCompiler && (
-              <div className={styles.resultContainer} style={{ height: "40%", borderRadius: "12px" }} >
-                <div className=" bg-gray-900 shadow-2xl shadow-gray-900/50" style={{ display: "flex", flexDirection: "row-reverse", height: "40px", borderRadius: "12px 12px 0px 0px" }}>
-                  <button
-                    className="top-2 right-2 text-whiterounded-full p-2 text-sm"
-                    style={{ marginRight: "10px" }}
-                    onClick={() => setShowCompiler(false)}
-                  >
-                    ❌
-                  </button>
-                </div>
+          {/* Code Editor Section */}
+          <div className={styles.codeEditorContainer}>
+            <div style={{ height: "100%" }}>
+              <div className={styles.languageSelector}>
+                <label htmlFor="language" className={styles.languageLabel}>Select Language:</label>
+                <select
+                  id="language"
+                  value={language}
+                  onChange={handleLanguageChange}
+                  className={styles.languageDropdown}
+                >
+                  <option value="python">🐍 Python</option>
+                  <option value="java">☕ Java</option>
+                  <option value="scala">🚀 Scala</option>
+                </select>
+              </div>
+              <div style={{ height: "calc(100% - 100px)" }} >
+                <CodeMirror
+                  value={code.replace(/\\n/g, "\n")}
+                  height="100%"
+                  extensions={[
+                    language === "python"
+                      ? [python(), pythonLinter]
+                      : language === "java"
+                        ? [java()]
+                        : [StreamLanguage.define(scala), scalaLinter],
+                  ]}
+                  editable={!isRunning}
+                  theme={basicDark}
+                  onChange={(value) => setCode(value)}
+                  basicSetup={{
+                    indentOnInput: true,
+                    tabSize: 4,
+                    bracketMatching: true,
+                    autoCloseBrackets: true,
+                  }}
+                />
+              </div>
 
-                <div className=" bg-gray-900" style={{ overflow: "auto", height: "calc(100% - 40px)" }} >
-                  {/* Close Button */}
-
-
-                  {/* Compiler Output */}
-                  {compilerOutput?.length > 0 && (
-                    <div className="p-4 bg-gray-800 text-white rounded-xl shadow-md" style={{ margin: "20px" }}>
-                      <h2 className="text-lg font-semibold mb-4">Compiler Output</h2>
-                      <pre className="whitespace-pre-wrap">{compilerOutput.join("\n")}</pre>
-                    </div>
+              <div className={styles.buttonGroup}>
+                {/* <button className={styles.runButton} onClick={handleRunCode}>Run</button> */}
+                <button
+                  className={`${styles.runButton} ${isRunning ? "opacity-50 cursor-not-allowed" : ""}`}
+                  onClick={handleRunCode}
+                  disabled={isRunning}
+                >
+                  {isRunning ? (
+                    <img src="/loading.gif" alt="Loading..." width="20" height="20" />
+                  ) : (
+                    "Run"
                   )}
-
-                  {/* Error Output */}
-                  {errorOutput?.length > 0 && (
-                    <div className="p-4 bg-gray-800 text-white rounded-xl shadow-md" style={{ margin: "20px" }}>
-                      <h2 className="text-lg font-semibold mb-4">Error Output</h2>
-                      <pre className="whitespace-pre-wrap">{errorOutput.join("\n")}</pre>
-                    </div>
+                </button>
+                <button
+                  className={`bg-red-600 ${styles.submitButton} hover:bg-red-700 ${isRunning ? "opacity-50 cursor-not-allowed" : ""}`}
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <img src="/loading.gif" alt="Submitting..." width="20" height="20" />
+                  ) : (
+                    "Submit"
                   )}
+                </button>
+              </div>
+            </div>
 
-                  {/* Submission Results */}
-                  <div className="p-4 bg-gray-900 text-white rounded-xl shadow-md text-center">
-                    <h2 className="text-lg font-semibold mb-4">Submission Results</h2>
-                    <div className="flex justify-center space-x-4">
-                      <div className="flex flex-col items-center bg-green-700 px-4 py-2 rounded-lg">
-                        <p className="text-xl font-bold">{passed}</p>
-                        <p className="text-sm">Passed ✅</p>
+            <div >
+              {showCompiler && (
+                <div className={styles.resultContainer} style={{ height: "40%", borderRadius: "12px" }} >
+                  <div className=" bg-gray-900 shadow-2xl shadow-gray-900/50" style={{ display: "flex", flexDirection: "row-reverse", height: "40px", borderRadius: "12px 12px 0px 0px" }}>
+                    <button
+                      className="top-2 right-2 text-whiterounded-full p-2 text-sm"
+                      style={{ marginRight: "10px" }}
+                      onClick={() => setShowCompiler(false)}
+                    >
+                      ❌
+                    </button>
+                  </div>
+
+                  <div className=" bg-gray-900" style={{ overflow: "auto", height: "calc(100% - 40px)" }} >
+                    {/* Close Button */}
+
+
+                    {/* Compiler Output */}
+                    {compilerOutput?.length > 0 && (
+                      <div className="p-4 bg-gray-800 text-white rounded-xl shadow-md" style={{ margin: "20px" }}>
+                        <h2 className="text-lg font-semibold mb-4">Compiler Output</h2>
+                        <pre className="whitespace-pre-wrap">{compilerOutput.join("\n")}</pre>
                       </div>
-                      <div className="flex flex-col items-center bg-red-700 px-4 py-2 rounded-lg">
-                        <p className="text-xl font-bold">{failed}</p>
-                        <p className="text-sm">Failed ❌</p>
+                    )}
+
+                    {/* Error Output */}
+                    {errorOutput?.length > 0 && (
+                      <div className="p-4 bg-gray-800 text-white rounded-xl shadow-md" style={{ margin: "20px" }}>
+                        <h2 className="text-lg font-semibold mb-4">Error Output</h2>
+                        <pre className="whitespace-pre-wrap">{errorOutput.join("\n")}</pre>
                       </div>
+                    )}
+
+                    {/* Submission Results */}
+                    <div className="p-4 bg-gray-900 text-white rounded-xl shadow-md text-center">
+                      <h2 className="text-lg font-semibold mb-4">Submission Results</h2>
+                      <div className="flex justify-center space-x-4">
+                        <div className="flex flex-col items-center bg-green-700 px-4 py-2 rounded-lg">
+                          <p className="text-xl font-bold">{passed}</p>
+                          <p className="text-sm">Passed ✅</p>
+                        </div>
+                        <div className="flex flex-col items-center bg-red-700 px-4 py-2 rounded-lg">
+                          <p className="text-xl font-bold">{failed}</p>
+                          <p className="text-sm">Failed ❌</p>
+                        </div>
+                      </div>
+                      <p className="mt-4 text-gray-300">Total Test Cases: {total}</p>
                     </div>
-                    <p className="mt-4 text-gray-300">Total Test Cases: {total}</p>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
+
+
+
           </div>
-
-
-
-        </div>
         </Split>
       </div>
     </div>
