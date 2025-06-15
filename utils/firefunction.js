@@ -2,6 +2,7 @@ import { db, auth, app } from '../src/app/firebase';
 import { getFirestore, doc, getDoc, collection, getDocs, updateDoc, arrayUnion, where, query, serverTimestamp, addDoc, setDoc, Timestamp } from "firebase/firestore";
 import { use } from 'react';
 import { v4 as uuidv4 } from "uuid";
+
 export async function getUserData(uid) {
   if (!uid) {
     throw new Error("UID is required to fetch user data.");
