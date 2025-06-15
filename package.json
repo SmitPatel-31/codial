@@ -22,6 +22,7 @@
     "@uiw/codemirror-theme-dracula": "^4.23.10",
     "@uiw/codemirror-themes-all": "^4.23.10",
     "@uiw/react-codemirror": "^4.23.10",
+    "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
     "codemirror": "^6.0.1",
     "firebase": "^11.3.1",
