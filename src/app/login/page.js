@@ -20,7 +20,7 @@ const SignIn = () => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      
+
       // Redirect to the main page after successful login
       setSuccess(true);
       router.push("/"); // Change this to the main screen or homepage route
@@ -45,7 +45,10 @@ const SignIn = () => {
             type="email"
             placeholder="Enter your email"
             value={email}
+
             onChange={(e) => setEmail(e.target.value)}
+            pattern=".*@northeastern\.edu$"
+            title="Please enter a valid @northeastern.edu email address"
             className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             required
           />

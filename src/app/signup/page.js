@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
-import { app, auth,db } from "../firebase";
+import { app, auth, db } from "../firebase";
 import { motion } from "framer-motion";
 
 
@@ -15,7 +15,7 @@ const Signup = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [emailError, setEmailError] = useState(null);  // New email error state
-  const [name , setName] = useState("");
+  const [name, setName] = useState("");
   const router = useRouter();
 
   const handleSignup = async (e) => {
@@ -71,6 +71,9 @@ const Signup = () => {
             placeholder="Enter your NU ID"
             value={nuId}
             onChange={(e) => setNuId(e.target.value)}
+            pattern="[0-9]{9}"
+            maxLength="9"
+            minLength="9"
             className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             required
           />
@@ -93,6 +96,8 @@ const Signup = () => {
             placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            pattern=".*@northeastern\.edu$"
+            title="Please enter a valid @northeastern.edu email address"
             className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             required
           />
