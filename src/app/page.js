@@ -29,7 +29,11 @@ export default function Home() {
 
   // Show loading state while checking auth status
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-slate-200">
+        Checking your session...
+      </div>
+    );
   }
 
   // Show login screen if the user is not logged in

@@ -10,8 +10,7 @@ import CodeMirror from "@uiw/react-codemirror";
 import { python } from "@codemirror/lang-python";
 import { java } from "@codemirror/lang-java";
 import { basicDark } from "@uiw/codemirror-theme-basic";
-import { hover } from "framer-motion";
-import { linter, lintGutter } from "@codemirror/lint";
+import { linter } from "@codemirror/lint";
 import { submitCode } from './submit';
 import { StreamLanguage } from '@codemirror/language';
 import { scala } from '@codemirror/legacy-modes/mode/clike';
@@ -31,7 +30,7 @@ const scalaLinter2 = linter(async (view) => {
     const lineNumber = index + 1;
     const lineInfo = view.state.doc.line(lineNumber);
 
-    // ❌ Use of `var`
+    // Avoid use of `var`
     if (/^\s*var\s/.test(line)) {
       errors.push({
         from: lineInfo.from,
@@ -41,7 +40,7 @@ const scalaLinter2 = linter(async (view) => {
       });
     }
 
-    // ❌ Function name starts with uppercase
+    // Function name starts with uppercase
     const defMatch = line.match(/def\s+([A-Z][a-zA-Z0-9_]*)\s*\(/);
     if (defMatch) {
       errors.push({
@@ -52,7 +51,7 @@ const scalaLinter2 = linter(async (view) => {
       });
     }
 
-    // ❌ Missing closing parenthesis in `for` loop
+    // Missing closing parenthesis in `for` loop
     if (/for\s*\([^)]+$/.test(line)) {
       errors.push({
         from: lineInfo.from,
@@ -62,17 +61,17 @@ const scalaLinter2 = linter(async (view) => {
       });
     }
 
-    // ❌ Thread.sleep usage
+    // Thread.sleep usage
     if (line.includes("Thread.sleep")) {
       errors.push({
         from: lineInfo.from,
         to: lineInfo.to,
         severity: "warning",
-        message: "Avoid using Thread.sleep — it's usually bad practice."
+        message: "Avoid using Thread.sleep - it's usually bad practice."
       });
     }
 
-    // ❌ Unmatched quotes
+    // Unmatched quotes
     const quoteCount = (line.match(/"/g) || []).length;
     if (quoteCount % 2 !== 0) {
       errors.push({
@@ -402,7 +401,20 @@ useEffect(() => {
     <div className={styles.examContainer}>
 
       <div className={styles.header}>
-        <h1 className={styles.examTitle}>📝 Exam: {examData?.title}</h1>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-indigo-200">
+            Live exam
+          </p>
+          <h1 className={styles.examTitle}>{examData?.title}</h1>
+        </div>
+        <div className="flex items-center gap-3 text-sm text-slate-300">
+          <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-emerald-100">
+            Session secure
+          </span>
+          <span className="rounded-full border border-slate-700 bg-slate-800 px-3 py-1">
+            {userData?.name || "Candidate"}
+          </span>
+        </div>
       </div>
       <ToastContainer />
 
@@ -447,9 +459,9 @@ useEffect(() => {
                   onChange={handleLanguageChange}
                   className={styles.languageDropdown}
                 >
-                  <option value="python">🐍 Python</option>
-                  <option value="java">☕ Java</option>
-                  <option value="scala">🚀 Scala</option>
+                  <option value="python">Python</option>
+                  <option value="java">Java</option>
+                  <option value="scala">Scala</option>
                 </select>
               </div>
               <div style={{ height: "calc(100% - 100px)" }} >
@@ -476,79 +488,67 @@ useEffect(() => {
               </div>
 
               <div className={styles.buttonGroup}>
-                {/* <button className={styles.runButton} onClick={handleRunCode}>Run</button> */}
                 <button
-                  className={`${styles.runButton} ${isRunning ? "opacity-50 cursor-not-allowed" : ""}`}
+                  className={`${styles.runButton} ${isRunning ? styles.disabled : ""}`}
                   onClick={handleRunCode}
                   disabled={isRunning}
                 >
-                  {isRunning ? (
-                    <img src="/loading.gif" alt="Loading..." width="20" height="20" />
-                  ) : (
-                    "Run"
-                  )}
+                  {isRunning ? <span className={styles.loader} /> : "Run"}
                 </button>
                 <button
-                  className={`bg-red-600 ${styles.submitButton} hover:bg-red-700 ${isRunning ? "opacity-50 cursor-not-allowed" : ""}`}
+                  className={`${styles.submitButton} ${isSubmitting ? styles.disabled : ""}`}
                   onClick={handleSubmit}
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? (
-                    <img src="/loading.gif" alt="Submitting..." width="20" height="20" />
-                  ) : (
-                    "Submit"
-                  )}
+                  {isSubmitting ? <span className={styles.loader} /> : "Submit"}
                 </button>
               </div>
             </div>
 
             <div >
               {showCompiler && (
-                <div className={styles.resultContainer} style={{ height: "40%", borderRadius: "12px" }} >
-                  <div className=" bg-gray-900 shadow-2xl shadow-gray-900/50" style={{ display: "flex", flexDirection: "row-reverse", height: "40px", borderRadius: "12px 12px 0px 0px" }}>
+                <div className={styles.resultContainer}>
+                  <div className={styles.resultHeader}>
                     <button
-                      className="top-2 right-2 text-whiterounded-full p-2 text-sm"
-                      style={{ marginRight: "10px" }}
+                      className={styles.closeButton}
                       onClick={() => setShowCompiler(false)}
                     >
-                      ❌
+                      Close
                     </button>
                   </div>
 
-                  <div className=" bg-gray-900" style={{ overflow: "auto", height: "calc(100% - 40px)" }} >
-                    {/* Close Button */}
-
-
-                    {/* Compiler Output */}
+                  <div className={`${styles.resultBody} bg-slate-900`}>
                     {compilerOutput?.length > 0 && (
-                      <div className="p-4 bg-gray-800 text-white rounded-xl shadow-md" style={{ margin: "20px" }}>
-                        <h2 className="text-lg font-semibold mb-4">Compiler Output</h2>
-                        <pre className="whitespace-pre-wrap">{compilerOutput.join("\n")}</pre>
+                      <div className="m-5 rounded-xl border border-slate-800 bg-slate-800 p-4 text-white shadow-md">
+                        <h2 className="text-lg font-semibold mb-4">Compiler output</h2>
+                        <pre className="whitespace-pre-wrap text-sm text-slate-200">
+                          {compilerOutput.join("\n")}
+                        </pre>
                       </div>
                     )}
 
-                    {/* Error Output */}
                     {errorOutput?.length > 0 && (
-                      <div className="p-4 bg-gray-800 text-white rounded-xl shadow-md" style={{ margin: "20px" }}>
-                        <h2 className="text-lg font-semibold mb-4">Error Output</h2>
-                        <pre className="whitespace-pre-wrap">{errorOutput.join("\n")}</pre>
+                      <div className="m-5 rounded-xl border border-slate-800 bg-slate-800 p-4 text-white shadow-md">
+                        <h2 className="text-lg font-semibold mb-4">Error output</h2>
+                        <pre className="whitespace-pre-wrap text-sm text-slate-200">
+                          {errorOutput.join("\n")}
+                        </pre>
                       </div>
                     )}
 
-                    {/* Submission Results */}
-                    <div className="p-4 bg-gray-900 text-white rounded-xl shadow-md text-center">
-                      <h2 className="text-lg font-semibold mb-4">Submission Results</h2>
+                    <div className="mx-5 mb-5 rounded-xl border border-slate-800 bg-slate-900 p-4 text-center text-white shadow-md">
+                      <h2 className="text-lg font-semibold mb-4">Submission results</h2>
                       <div className="flex justify-center space-x-4">
-                        <div className="flex flex-col items-center bg-green-700 px-4 py-2 rounded-lg">
-                          <p className="text-xl font-bold">{passed}</p>
-                          <p className="text-sm">Passed ✅</p>
+                        <div className="flex flex-col items-center rounded-lg bg-emerald-500/20 px-4 py-2">
+                          <p className="text-xl font-bold text-emerald-200">{passed}</p>
+                          <p className="text-sm text-emerald-100">Passed</p>
                         </div>
-                        <div className="flex flex-col items-center bg-red-700 px-4 py-2 rounded-lg">
-                          <p className="text-xl font-bold">{failed}</p>
-                          <p className="text-sm">Failed ❌</p>
+                        <div className="flex flex-col items-center rounded-lg bg-rose-500/20 px-4 py-2">
+                          <p className="text-xl font-bold text-rose-200">{failed}</p>
+                          <p className="text-sm text-rose-100">Failed</p>
                         </div>
                       </div>
-                      <p className="mt-4 text-gray-300">Total Test Cases: {total}</p>
+                      <p className="mt-4 text-slate-300">Total test cases: {total}</p>
                     </div>
                   </div>
                 </div>

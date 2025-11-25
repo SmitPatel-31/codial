@@ -55,95 +55,106 @@ const Signup = () => {
   };
 
   return (
-    <div
-      className="flex items-center justify-center min-h-screen"
-      style={{
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <h2 className="text-3xl font-extrabold text-gray-900 mb-3">Create your account</h2>
-      <form onSubmit={handleSignup} className="space-y-5">
-        <div className="text-left">
-          <label className="text-sm font-semibold text-gray-700">NU ID</label>
-          <input
-            type="text"
-            placeholder="Enter your NU ID"
-            value={nuId}
-            onChange={(e) => setNuId(e.target.value)}
-            pattern="[0-9]{9}"
-            maxLength="9"
-            minLength="9"
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            required
-          />
-        </div>
-        <div className="text-left">
-          <label className="text-sm font-semibold text-gray-700">Name</label>
-          <input
-            type="text"
-            placeholder="Enter your Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            required
-          />
-        </div>
-        <div className="text-left">
-          <label className="text-sm font-semibold text-gray-700">Email</label>
-          <input
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            pattern=".*@northeastern\.edu$"
-            title="Please enter a valid @northeastern.edu email address"
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            required
-          />
-          {emailError && <p className="text-red-500 text-sm mt-2">{emailError}</p>} {/* Display email error */}
-        </div>
-        <div className="text-left">
-          <label className="text-sm font-semibold text-gray-700">Password</label>
-          <input
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            required
-          />
-        </div>
-        <div className="text-left">
-          <label className="text-sm font-semibold text-gray-700">Confirm Password</label>
-          <input
-            type="password"
-            placeholder="Confirm your password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            required
-          />
-        </div>
-        <button
-          type="submit"
-          className="w-full bg-indigo-600 text-white p-3 rounded-lg hover:bg-indigo-700 transition font-semibold text-lg"
-        >
-          Sign up
-        </button>
-        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-        {success && (
-          <p className="text-green-500 text-sm mt-2">Account created successfully! Redirecting...</p>
-        )}
-      </form>
+    <div className="relative flex min-h-screen items-center justify-center px-4 py-12">
+      <div
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.18),transparent_26%),radial-gradient(circle_at_80%_0%,rgba(56,189,248,0.16),transparent_30%),radial-gradient(circle_at_50%_90%,rgba(109,40,217,0.2),transparent_36%)]"
+        aria-hidden="true"
+      />
 
-      <div className="mt-4">
-        <p className="text-sm text-gray-600">
-          Already have an account?{" "}
-          <a href="/login" className="text-indigo-600 hover:underline">
+      <div className="w-full max-w-xl">
+        <div className="mb-6 text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.26em] text-indigo-200">
+            Join the workspace
+          </p>
+          <h2 className="mt-2 text-3xl font-extrabold text-white">Create your account</h2>
+          <p className="mt-2 text-sm text-slate-400">
+            Register with your Northeastern email to access exams and dashboards.
+          </p>
+        </div>
+
+        <form
+          onSubmit={handleSignup}
+          className="space-y-5 rounded-2xl border border-slate-800 bg-slate-900/70 p-7 shadow-2xl shadow-indigo-900/30 backdrop-blur"
+        >
+          <div className="text-left">
+            <label className="text-sm font-semibold text-slate-200">NU ID</label>
+            <input
+              type="text"
+              placeholder="Enter your NU ID"
+              value={nuId}
+              onChange={(e) => setNuId(e.target.value)}
+              pattern="[0-9]{9}"
+              maxLength="9"
+              minLength="9"
+              className="mt-2 w-full rounded-xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-indigo-400/60 focus:outline-none focus:ring-2 focus:ring-indigo-400/60"
+              required
+            />
+          </div>
+          <div className="text-left">
+            <label className="text-sm font-semibold text-slate-200">Name</label>
+            <input
+              type="text"
+              placeholder="Enter your name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="mt-2 w-full rounded-xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-indigo-400/60 focus:outline-none focus:ring-2 focus:ring-indigo-400/60"
+              required
+            />
+          </div>
+          <div className="text-left">
+            <label className="text-sm font-semibold text-slate-200">Email</label>
+            <input
+              type="email"
+              placeholder="you@northeastern.edu"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              pattern=".*@northeastern\.edu$"
+              title="Please enter a valid @northeastern.edu email address"
+              className="mt-2 w-full rounded-xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-indigo-400/60 focus:outline-none focus:ring-2 focus:ring-indigo-400/60"
+              required
+            />
+            {emailError && <p className="text-sm text-amber-300">{emailError}</p>}
+          </div>
+          <div className="text-left">
+            <label className="text-sm font-semibold text-slate-200">Password</label>
+            <input
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="mt-2 w-full rounded-xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-indigo-400/60 focus:outline-none focus:ring-2 focus:ring-indigo-400/60"
+              required
+            />
+          </div>
+          <div className="text-left">
+            <label className="text-sm font-semibold text-slate-200">Confirm password</label>
+            <input
+              type="password"
+              placeholder="Confirm your password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="mt-2 w-full rounded-xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-indigo-400/60 focus:outline-none focus:ring-2 focus:ring-indigo-400/60"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-sky-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/40 transition hover:scale-[1.01] hover:from-indigo-600 hover:via-purple-600 hover:to-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-950"
+          >
+            Sign up
+          </button>
+          {error && <p className="text-sm text-red-400">{error}</p>}
+          {success && (
+            <p className="text-sm text-emerald-300">Account created successfully! Redirecting...</p>
+          )}
+        </form>
+
+        <div className="mt-4 text-center text-sm text-slate-400">
+          <span>Already have an account? </span>
+          <a href="/login" className="font-semibold text-indigo-200 hover:text-indigo-100">
             Sign in
           </a>
-        </p>
+        </div>
       </div>
     </div>
   );

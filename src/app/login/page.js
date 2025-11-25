@@ -21,66 +21,77 @@ const SignIn = () => {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Redirect to the main page after successful login
       setSuccess(true);
-      router.push("/"); // Change this to the main screen or homepage route
+      router.push("/");
     } catch (err) {
       setError("Invalid email or password");
     }
   };
 
   return (
-    <div
-      className="flex items-center justify-center min-h-screen"
-      style={{
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <h2 className="text-3xl font-extrabold text-gray-900 mb-3">Sign In</h2>
-      <form onSubmit={handleSignIn} className="space-y-5">
-        <div className="text-left">
-          <label className="text-sm font-semibold text-gray-700">Email</label>
-          <input
-            type="email"
-            placeholder="Enter your email"
-            value={email}
+    <div className="relative flex min-h-screen items-center justify-center px-4 py-12">
+      <div
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.18),transparent_26%),radial-gradient(circle_at_80%_0%,rgba(56,189,248,0.16),transparent_30%),radial-gradient(circle_at_50%_90%,rgba(109,40,217,0.2),transparent_36%)]"
+        aria-hidden="true"
+      />
 
-            onChange={(e) => setEmail(e.target.value)}
-            pattern=".*@northeastern\.edu$"
-            title="Please enter a valid @northeastern.edu email address"
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            required
-          />
+      <div className="w-full max-w-md">
+        <div className="mb-6 text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.26em] text-indigo-200">
+            Welcome back
+          </p>
+          <h2 className="mt-2 text-3xl font-extrabold text-white">Sign in</h2>
+          <p className="mt-2 text-sm text-slate-400">
+            Access your dashboard and upcoming exams.
+          </p>
         </div>
-        <div className="text-left">
-          <label className="text-sm font-semibold text-gray-700">Password</label>
-          <input
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            required
-          />
-        </div>
-        <button
-          type="submit"
-          className="w-full bg-indigo-600 text-white p-3 rounded-lg hover:bg-indigo-700 transition font-semibold text-lg"
+
+        <form
+          onSubmit={handleSignIn}
+          className="space-y-5 rounded-2xl border border-slate-800 bg-slate-900/70 p-7 shadow-2xl shadow-indigo-900/30 backdrop-blur"
         >
-          Sign In
-        </button>
-        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-        {success && <p className="text-green-500 text-sm mt-2">Logged in successfully! Redirecting...</p>}
-      </form>
+          <div className="text-left">
+            <label className="text-sm font-semibold text-slate-200">Email</label>
+            <input
+              type="email"
+              placeholder="you@northeastern.edu"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              pattern=".*@northeastern\.edu$"
+              title="Please enter a valid @northeastern.edu email address"
+              className="mt-2 w-full rounded-xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-indigo-400/60 focus:outline-none focus:ring-2 focus:ring-indigo-400/60"
+              required
+            />
+          </div>
+          <div className="text-left">
+            <label className="text-sm font-semibold text-slate-200">Password</label>
+            <input
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="mt-2 w-full rounded-xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-indigo-400/60 focus:outline-none focus:ring-2 focus:ring-indigo-400/60"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-sky-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/40 transition hover:scale-[1.01] hover:from-indigo-600 hover:via-purple-600 hover:to-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-950"
+          >
+            Sign in
+          </button>
+          {error && <p className="text-sm text-red-400">{error}</p>}
+          {success && (
+            <p className="text-sm text-emerald-300">Logged in successfully! Redirecting...</p>
+          )}
+        </form>
 
-      <div className="mt-4">
-        <p className="text-sm text-gray-600">
-          Don't have an account?{" "}
-          <a href="/signup" className="text-indigo-600 hover:underline">
+        <div className="mt-4 text-center text-sm text-slate-400">
+          <span>Do not have an account? </span>
+          <a href="/signup" className="font-semibold text-indigo-200 hover:text-indigo-100">
             Sign up
           </a>
-        </p>
+        </div>
       </div>
     </div>
   );
