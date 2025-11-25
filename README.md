@@ -57,9 +57,12 @@ Then, open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Screenshot
 
-<img width="1440" alt="Screenshot 2025-04-17 at 12 06 43 PM" src="https://github.com/user-attachments/assets/ce57b380-d9ea-4d62-9868-cf164f799c0f" />
+<img width="1512" height="982" alt="Screenshot 2025-11-24 at 8 00 41 PM" src="https://github.com/user-attachments/assets/6ccadac7-f02e-4d60-b663-7bfafffcb614" />
+<img width="1512" height="982" alt="Screenshot 2025-11-24 at 8 00 49 PM" src="https://github.com/user-attachments/assets/86ceb482-b09a-4f9e-bc5a-6949ca2bcafb" />
+<img width="1512" height="982" alt="Screenshot 2025-11-24 at 8 01 28 PM" src="https://github.com/user-attachments/assets/f0ad0b5d-3d65-48e2-84cb-f309b3321e6e" />
+<img width="1512" height="982" alt="Screenshot 2025-11-24 at 8 01 30 PM" src="https://github.com/user-attachments/assets/1f04aeba-b0ac-451a-9426-fb497eef8c7a" />
+<img width="1512" height="982" alt="Screenshot 2025-11-24 at 8 01 57 PM" src="https://github.com/user-attachments/assets/a57f4949-4ef9-439b-9a66-914bdf16bc90" />
 
----
 
 ## Contributing
 
